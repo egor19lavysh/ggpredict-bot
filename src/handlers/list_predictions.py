@@ -61,7 +61,7 @@ async def show_prediction(bot: Bot, chat_id: int, prediction: Prediction):
 @router.callback_query(F.data.startswith("prediction_"))
 async def show_prediction_detail(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
-    await callback.message.delete*()
+    await callback.message.delete()
     
     prediction_id = int(callback.data.split("_")[-1])
     await state.update_data(prediction_id=prediction_id)

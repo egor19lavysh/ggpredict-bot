@@ -7,7 +7,7 @@ class RedisRepository:
     """Репозиторий для работы с Redis кешем"""
     
     # Время жизни ключей в Redis (6 часов = 21600 секунд)
-    TTL_SECONDS = 6 * 60 * 60
+    TTL_SECONDS = 60 * 2
     
     # Префиксы для ключей
     USER_PREFIX = "user:"
