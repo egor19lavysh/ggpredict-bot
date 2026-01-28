@@ -63,17 +63,15 @@ def predictions_keyboard(
     navigation_row = []
     
     # Кнопка "Назад"
-    if current_page > 0:
-        navigation_row.append(InlineKeyboardButton(
-            text="⬅️ Назад",
-            callback_data=f"predictions_page_{current_page - 1}"
+    navigation_row.append(InlineKeyboardButton(
+            text="⬅️Назад",
+            callback_data=f"predictions_page_{current_page - 1}" if current_page > 0 else "blank"
         ))
     
-    # Кнопка "Вперед"
-    if current_page < total_pages - 1:
-        navigation_row.append(InlineKeyboardButton(
-            text="Вперед ➡️",
-            callback_data=f"predictions_page_{current_page + 1}"
+    # Кнопка "Вперед" 
+    navigation_row.append(InlineKeyboardButton(
+            text="Вперед➡️",
+            callback_data=f"predictions_page_{current_page + 1}" if current_page < total_pages - 1 else "blank"
         ))
     
     if navigation_row:
@@ -87,3 +85,4 @@ def predictions_keyboard(
     keyboard.inline_keyboard.append(back_row)
     
     return keyboard
+

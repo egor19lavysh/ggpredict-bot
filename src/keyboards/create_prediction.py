@@ -22,3 +22,20 @@ async def status_kb() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="Без приза", callback_data="status_Без приза")],
     ])
     return keyboard
+
+async def delete_confirm_kb() -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Да✅", callback_data="confirm_да"), 
+         InlineKeyboardButton(text="Нет❌", callback_data="confirm_нет")]
+        ])
+    return markup
+
+async def edit_prediction_fields_kb() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Текст", callback_data="edit_text")],
+        [InlineKeyboardButton(text="Изображение", callback_data="edit_image")],
+        [InlineKeyboardButton(text="Статус", callback_data="edit_status")],
+        [InlineKeyboardButton(text="Шанс", callback_data="edit_chance")],
+        [InlineKeyboardButton(text="Назад", callback_data="edit_back")],
+    ])
+    return keyboard

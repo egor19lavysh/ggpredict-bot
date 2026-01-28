@@ -112,6 +112,23 @@ class PredictionService:
         """
         return await self.repository.update_status(prediction_id, status)
     
+    async def update_prediction_chance(
+        self,
+        prediction_id: int,
+        chance: float
+    ) -> Optional[Prediction]:
+        """
+        Изменение шанса предсказания
+        
+        Args:
+            prediction_id: ID предсказания
+            chance: Новый шанс
+            
+        Returns:
+            Обновленный объект Prediction или None, если не найдено
+        """
+        return await self.repository.update_chance(prediction_id, chance)
+    
     async def delete_prediction(self, prediction_id: int) -> bool:
         """
         Удаление предсказания по ID

@@ -39,6 +39,5 @@ async def admin_password_handler(message: Message, state: FSMContext) -> None:
         return
 
     
-    
 async def send_kb_to_admin(message: Message) -> None:
     await message.answer("Выберите действие:", reply_markup=await create_prediction_keyboard())
