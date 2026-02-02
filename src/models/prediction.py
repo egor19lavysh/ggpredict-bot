@@ -21,3 +21,4 @@ class Prediction(Base):
     image: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[str] = mapped_column(default=StatusEnum.WITHOUT_PRIZE)
     chance: Mapped[float]
+    accumulated: Mapped[float] = mapped_column(default=0.0, nullable=True)

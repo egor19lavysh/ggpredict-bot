@@ -35,7 +35,7 @@ async def show_predictions_page(callback: CallbackQuery):
     
 
 async def show_prediction(bot: Bot, chat_id: int, prediction: Prediction):
-    prediction_text = f"Предсказание: {prediction.text}\nСтатус: {prediction.status}\nШанс: {prediction.chance}%"
+    prediction_text = f"Предсказание: {prediction.text}\nСтатус: {prediction.status}\nШанс: {prediction.chance + prediction.accumulated}%"
     if prediction.image:
         try:
             await bot.send_photo(
@@ -47,7 +47,7 @@ async def show_prediction(bot: Bot, chat_id: int, prediction: Prediction):
             await bot.send_animation(
                     chat_id,
                     animation=prediction.image,
-                    caption=f"Предсказание: {prediction.text}\nСтатус: {prediction.status}\nШанс: {prediction.chance}%"
+                    caption=prediction_text
                 )
         except Exception as e:
             await bot.send_message(chat_id=chat_id, text="Произошла какая-то ошибка. Бот не смог отправить предсказание")
@@ -55,7 +55,7 @@ async def show_prediction(bot: Bot, chat_id: int, prediction: Prediction):
     else:
         await bot.send_message(
                     chat_id,
-                    text=f"Предсказание: {prediction.text}\nСтатус: {prediction.status}\nШанс: {prediction.chance}%"
+                    text=prediction_text
                 )
 
 @router.callback_query(F.data.startswith("prediction_"))

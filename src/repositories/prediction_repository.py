@@ -160,6 +160,29 @@ class PredictionRepository:
                 await session.commit()
                 await session.refresh(prediction)
             return prediction
+        
+    @staticmethod
+    async def update_accumulted(prediction_id: int, value: float) -> Optional[Prediction]:
+        """
+        Изменение накопленного шанса (для не обычных предсказаний)
+        
+        Args:
+            prediction_id: ID предсказания
+            value: Новый накопленный шанс (вероятность)
+            
+        Returns:
+            Обновленный объект Prediction или None, если не найдено
+        """
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(Prediction).where(Prediction.id == prediction_id)
+            )
+            prediction = result.scalar_one_or_none()
+            if prediction:
+                prediction.accumulated = value
+                await session.commit()
+                await session.refresh(prediction)
+            return prediction
 
     @staticmethod
     async def delete(prediction_id: int) -> bool:

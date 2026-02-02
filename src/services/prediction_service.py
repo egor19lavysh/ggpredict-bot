@@ -49,6 +49,14 @@ class PredictionService:
         """
         return await self.repository.get_all()
     
+    async def get_unusual_predictions(self) -> List[Prediction]:
+        predicitions = await self.get_all_predictions()
+        unusual_predictions = []
+        for prediction in predicitions:
+            if prediction.status != StatusEnum.WITHOUT_PRIZE:
+                unusual_predictions.append(prediction)
+        return unusual_predictions
+
     async def get_prediction_by_id(self, prediction_id: int) -> Optional[Prediction]:
         """
         Получение предсказания по ID
@@ -129,6 +137,33 @@ class PredictionService:
         """
         return await self.repository.update_chance(prediction_id, chance)
     
+    async def update_prediction_accumulted(
+            self,
+            prediction_id: int,
+            value: float
+    ) -> Optional[Prediction]:
+        return await self.repository.update_accumulted(prediction_id=prediction_id, value=value)
+    
+    async def reset_predictions_accumulated(self) -> None:
+        predictions = await self.get_unusual_predictions()
+        for prediction in predictions:
+            await self.update_prediction_accumulted(prediction_id=prediction.id, value=0)
+
+    async def add_to_prediction_accumulted(
+            self,
+            prediction_id: int,
+            value: float
+    ) -> Optional[Prediction]:
+        if prediction := await self.get_prediction_by_id(prediction_id=prediction_id):
+            return await self.update_prediction_accumulted(prediction_id=prediction_id, value=prediction.accumulated + value)
+        return None
+    
+    async def add_unusual_predictions_accumulated(self, value: float = 0.01) -> None:
+        predictions = await self.get_unusual_predictions()
+        for prediction in predictions:
+            await self.add_to_prediction_accumulted(prediction_id=prediction.id, value=value)
+
+    
     async def delete_prediction(self, prediction_id: int) -> bool:
         """
         Удаление предсказания по ID
@@ -154,7 +189,7 @@ class PredictionService:
             return None
         
         # Извлекаем шансы
-        chances = np.array([prediction.chance for prediction in predictions])
+        chances = np.array([prediction.chance + prediction.accumulated for prediction in predictions])
         
         # Нормализуем шансы в вероятности (сумма = 1)
         probabilities = chances / chances.sum()
@@ -181,6 +216,9 @@ class PredictionService:
         if prediction.status != StatusEnum.WITHOUT_PRIZE:
             await notify_admins(bot=bot, user_id=user_id, status=prediction.status)
             await self.delete_prediction(prediction.id)
+            await self.reset_predictions_accumulated()
+        else:
+            await self.add_unusual_predictions_accumulated()
         
         return prediction
     
