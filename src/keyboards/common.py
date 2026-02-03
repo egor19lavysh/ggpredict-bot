@@ -6,7 +6,7 @@ from src.models.prediction import Prediction
 def predictions_keyboard(
     predictions: List[Prediction],
     current_page: int = 0,
-    items_per_page: int = 2
+    items_per_page: int = 18
 ) -> InlineKeyboardMarkup:
     """
     Создание клавиатуры с предсказаниями (2 столбца по 9 предсказаний).
