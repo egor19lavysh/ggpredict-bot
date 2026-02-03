@@ -1,4 +1,5 @@
 from aiogram import Router, F
+from aiogram.types import ReplyKeyboardRemove
 from src.keyboards.create_prediction import *
 from src.keyboards.common import get_back_kb
 from src.repositories.redis_repository import RedisRepository
@@ -32,7 +33,7 @@ async def receive_prediction_text(message: Message, state: FSMContext) -> None:
     prediction_text = message.text.strip()
 
     if prediction_text.lower() == "назад":
-        await message.answer("Создание предсказания отменено.", reply_markup=None)
+        await message.answer("Создание предсказания отменено.", reply_markup=ReplyKeyboardRemove())
         await state.clear()
         await send_kb_to_admin(message)
         return
@@ -95,7 +96,7 @@ async def receive_prediction_status(callback: CallbackQuery, state: FSMContext) 
 @router.message(CreatePredictionStates.chance)
 async def receive_prediction_chance(message: Message, state: FSMContext) -> None:
     chance_text = message.text.strip()
-    
+
     if chance_text.lower() == "назад":
         await message.answer("Это предсказание с призом? Если да, то какой приз выиграет участник:", 
                          reply_markup=await status_kb(with_back=True))
@@ -122,7 +123,7 @@ async def receive_prediction_chance(message: Message, state: FSMContext) -> None
         status=status
     )
 
-    await message.answer("Новое предсказание успешно создано!")
+    await message.answer("Новое предсказание успешно создано!", reply_markup=ReplyKeyboardRemove())
     await state.clear()
     await send_kb_to_admin(message)
 
