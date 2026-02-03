@@ -103,19 +103,15 @@ async def receive_edit_status(callback: CallbackQuery, state: FSMContext) -> Non
 async def start_edit_chance(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.answer()
     await callback.message.delete()
-    await callback.message.answer("Введите новый шанс выпадения предсказания числом и процентом без пробела между ними. Например: 50%")
+    await callback.message.answer("Введите новый шанс выпадения предсказания числом.")
     await state.set_state(EditPredictionStates.chance)
 
 
 @router.message(EditPredictionStates.chance)
 async def receive_edit_chance(message: Message, state: FSMContext) -> None:
     chance_text = message.text.strip()
-    if not chance_text.endswith("%"):
-        await message.answer("Пожалуйста, введите шанс в правильном формате, например: 50%")
-        return
-
     try:
-        chance_value = float(chance_text[:-1])
+        chance_value = float(chance_text)
         if not (0 <= chance_value <= 100):
             raise ValueError
     except ValueError:

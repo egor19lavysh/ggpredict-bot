@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from typing import List
 from src.models.prediction import Prediction
 
@@ -86,3 +86,9 @@ def predictions_keyboard(
     
     return keyboard
 
+def get_back_kb() -> ReplyKeyboardMarkup:
+    """Клавиатура с кнопкой 'Назад'."""
+    keyboard = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="Назад")]
+    ], resize_keyboard=True)
+    return keyboard

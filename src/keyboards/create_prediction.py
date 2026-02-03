@@ -9,18 +9,26 @@ async def create_prediction_keyboard() -> InlineKeyboardMarkup:
     ])
     return keyboard
 
-async def skip_kb() -> InlineKeyboardMarkup:
+async def skip_kb(with_back: bool = False) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Пропустить⏩", callback_data="skip_image")]
     ])
+    
+    if with_back:
+        keyboard.inline_keyboard.append([InlineKeyboardButton(text="Назад", callback_data="skip_back")])
+    
     return keyboard
 
-async def status_kb() -> InlineKeyboardMarkup:
+async def status_kb(with_back: bool = False) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Легендарный", callback_data="status_Легендарный"), InlineKeyboardButton(text="Редкий", callback_data="status_Редкий")],
         [InlineKeyboardButton(text="Эпический", callback_data="status_Эпический"), InlineKeyboardButton(text="Ключ игры Steam", callback_data="status_Ключ игры Steam")],
         [InlineKeyboardButton(text="Без приза", callback_data="status_Без приза")],
     ])
+    
+    if with_back:
+        keyboard.inline_keyboard.append([InlineKeyboardButton(text="Назад", callback_data="status_back")])
+    
     return keyboard
 
 async def delete_confirm_kb() -> InlineKeyboardMarkup:

@@ -238,17 +238,17 @@ class PredictionService:
             PredictionNotFound: Если нет доступных предсказаний
         """
         # Проверяем, есть ли пользователь в кэше
-        user_exists = await self.redis_repository.is_user_exists(user_id)
+        # user_exists = await self.redis_repository.is_user_exists(user_id)
         
-        if user_exists:
-            raise PredictionLimitExceeded(
-                f"Вы уже получали предсказание. Попробуйте позже."
-            )
+        # if user_exists:
+        #     raise PredictionLimitExceeded(
+        #         f"Вы уже получали предсказание. Попробуйте позже."
+        #     )
         
         # Получаем предсказание
         prediction = await self._get_prediction(bot=bot, user_id=user_id)
         
         # Добавляем пользователя в кэш на 6 часов
-        await self.redis_repository.add_user(user_id)
+        #await self.redis_repository.add_user(user_id)
         
         return prediction

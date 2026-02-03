@@ -1,3 +1,4 @@
+import time
 import redis.asyncio as redis
 from typing import Optional
 from src.config import settings
@@ -44,7 +45,9 @@ class RedisRepository:
         """
         await self.connect()
         key = f"{self.USER_PREFIX}:{user_id}"
-        await self.redis.setex(key, self.TTL_SECONDS, "1")
+        # Store the epoch seconds when the user was cached as the value
+        timestamp = int(time.time())
+        await self.redis.setex(key, self.TTL_SECONDS, str(timestamp))
         return True
     
     async def is_user_exists(self, user_id: int) -> bool:
@@ -61,7 +64,7 @@ class RedisRepository:
         key = f"{self.USER_PREFIX}:{user_id}"
         result = await self.redis.exists(key)
         return result == 1
-    
+
     async def remove_user(self, user_id: int) -> bool:
         """
         Удаление пользователя из кеша
