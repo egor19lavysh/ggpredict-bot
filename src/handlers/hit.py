@@ -66,6 +66,7 @@ async def hit_command_handler(message: Message):
     except MessageLimitExceeded:
         user_timestamp = await redis_repository.get_user(message.from_user.id)
         current_time = datetime.datetime.now() # Текущее время + 3 часа для корректного отображения
+        print(current_time)
         time = await get_cooldown_message(user_timestamp, current_time)
         message_sent = await message.reply(f"🧧 Ты уже нанес урон {boss.name if boss else 'главному боссу'} 🧧\nДо следующей попытки: {time} часов⏳")
         await asyncio.sleep(5)
