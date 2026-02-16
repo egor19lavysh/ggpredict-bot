@@ -37,17 +37,18 @@ TEXT_MESSAGE = """
 
 @router.message(Command("hit"))
 async def hit_command_handler(message: Message):
+
+    if await redis_repository.is_main_boss_exists():
+        main_boss_id = await redis_repository.get_main_boss_id()
+    else:
+        main_boss_id = await main_boss_repository.get_main_boss_id()
+        if main_boss_id is not None:
+            await redis_repository.save_main_boss_id(main_boss_id)
+
+    boss = await boss_service.get_boss_by_id(main_boss_id)
+    
     try:
         msg, damage =await message_service.get_message_and_damage(user_id=message.from_user.id)
-
-        if await redis_repository.is_main_boss_exists():
-            main_boss_id = await redis_repository.get_main_boss_id()
-        else:
-            main_boss_id = await main_boss_repository.get_main_boss_id()
-            if main_boss_id is not None:
-                await redis_repository.save_main_boss_id(main_boss_id)
-
-        boss = await boss_service.get_boss_by_id(main_boss_id)
 
         await message.reply(TEXT_MESSAGE.format(
             user=message.from_user.first_name if message.from_user.first_name else "Странник",
@@ -66,7 +67,7 @@ async def hit_command_handler(message: Message):
         user_timestamp = await redis_repository.get_user(message.from_user.id)
         current_time = datetime.datetime.now() + timedelta(hours=3)  # Текущее время + 3 часа для корректного отображения
         time = await get_cooldown_message(user_timestamp, current_time)
-        message_sent = await message.reply(f"Ты уже нанес урон главному боссу. ⏳До следующей попытки нанести урон: {time} часов")
+        message_sent = await message.reply(f"🧧 Ты уже нанес урон {boss.name if boss else 'главному боссу'} 🧧\nДо следующей попытки: {time} часов⏳")
         await asyncio.sleep(5)
         await message_sent.delete()
         await message.delete()
