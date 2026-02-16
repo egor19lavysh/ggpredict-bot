@@ -27,9 +27,11 @@ gs_client = GoogleSheetsClient(
     )
 
 TEXT_MESSAGE = """
-{user} нанес {damage} {boss} 
-Ты исследовал подземелье, вынес оттуда пару артефактов и влепил боссу как следует — {message} 
-До следующей попытки нанести урон: 3 часа
+{user} нанес {damage} урона {boss} 💥
+
+{message}
+
+⏳До следующей попытки нанести урон: 3 часа
 """
 
 
@@ -48,7 +50,7 @@ async def hit_command_handler(message: Message):
         boss = await boss_service.get_boss_by_id(main_boss_id)
 
         await message.reply(TEXT_MESSAGE.format(
-            user=message.from_user.username if message.from_user.username else "Ты",
+            user=message.from_user.first_name if message.from_user.first_name else "Странник",
             damage=damage,
             boss=boss.name if boss else "главному боссу",
             message=msg.text))
@@ -63,8 +65,8 @@ async def hit_command_handler(message: Message):
     except MessageLimitExceeded:
         user_timestamp = await redis_repository.get_user(message.from_user.id)
         current_time = datetime.datetime.now() + timedelta(hours=3)  # Текущее время + 3 часа для корректного отображения
-        time = get_cooldown_message(user_timestamp, current_time)
-        message_sent = await message.reply(f"Ты уже нанес урон главному боссу. {time}")
+        time = await get_cooldown_message(user_timestamp, current_time)
+        message_sent = await message.reply(f"Ты уже нанес урон главному боссу. ⏳До следующей попытки нанести урон: {time} часов")
         await asyncio.sleep(5)
         await message_sent.delete()
         await message.delete()
