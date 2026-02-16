@@ -12,6 +12,7 @@ from src.utils.google_sheets_client import GoogleSheetsClient
 from src.services.boss_service import BossService
 from src.utils.time_utils import get_cooldown_message
 from src.config import settings
+from datetime import timedelta
 import asyncio
 
 
@@ -55,13 +56,13 @@ async def hit_command_handler(message: Message):
         await gs_client.hit(
             user_info=[message.from_user.id, 
                        message.from_user.username if message.from_user.username else "Аноним", 
-                       str(datetime.datetime.now())],
+                       str(datetime.datetime.now() + timedelta(hours=3))],  # Сохраняем время следующей попытки
             boss_name=boss.name if boss else "Главный босс"
         )
         
     except MessageLimitExceeded:
         user_timestamp = await redis_repository.get_user(message.from_user.id)
-        current_time = datetime.datetime.now()
+        current_time = datetime.datetime.now() + timedelta(hours=3)  # Текущее время + 3 часа для корректного отображения1
         time = get_cooldown_message(user_timestamp, current_time)
         message_sent = await message.reply(f"Ты уже нанес урон главному боссу. {time}")
         await asyncio.sleep(5)
