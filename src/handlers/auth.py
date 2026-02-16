@@ -1,7 +1,7 @@
 from aiogram import Router
-from src.keyboards.create_prediction import create_prediction_keyboard
+from src.keyboards.common import get_entities_kb
 from src.repositories.redis_repository import RedisRepository
-from src.services.prediction_service import PredictionService
+from src.services.message_service import MessageService
 from src.services.auth_service import AuthService
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
@@ -13,7 +13,7 @@ router = Router()
 
 redis_repository = RedisRepository()
 auth_service = AuthService(redis_repository=redis_repository)
-prediction_service = PredictionService(redis_repository=redis_repository)
+message_service = MessageService(redis_repository=redis_repository)
 
 @router.message(Command("admin"))
 async def admin_command_handler(message: Message, state: FSMContext) -> None:
@@ -33,11 +33,11 @@ async def admin_password_handler(message: Message, state: FSMContext) -> None:
     if await auth_service.authenticate_admin(user_id, password):
         await message.answer("Аутентификация успешна!")
         await state.clear()
-        await message.answer("Выберите действие:",  reply_markup=await create_prediction_keyboard())
+        await message.answer("Выберите сущность:",  reply_markup=get_entities_kb())
     else:
         await message.answer("Неверный пароль. Попробуйте снова.")
         return
 
     
 async def send_kb_to_admin(message: Message) -> None:
-    await message.answer("Выберите действие:", reply_markup=await create_prediction_keyboard())
+    await message.answer("Выберите сущность:", reply_markup=get_entities_kb())

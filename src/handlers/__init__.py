@@ -1,15 +1,17 @@
 from .auth import router as auth_router
-from .create_prediction import router as create_prediction_router
-from .list_predictions import router as list_predictions_router
-from .delete_prediction import router as delete_prediction_router
-from .edit_prediction import router as edit_prediction_router
-from .predict import router as predict_router
+from .create_message import router as create_message_router
+from .list_messages import router as list_messages_router
+from .delete_message import router as delete_message_router
+from .edit_message import router as edit_message_router
+from .list_bosses import router as list_bosses_router
+from .hit import router as hit_router
 
 routers = [
     auth_router,
-    create_prediction_router,
-    list_predictions_router,
-    delete_prediction_router,
-    edit_prediction_router,
-    predict_router
+    create_message_router,
+    list_messages_router,
+    delete_message_router,
+    edit_message_router,
+    list_bosses_router,
+    hit_router
 ]

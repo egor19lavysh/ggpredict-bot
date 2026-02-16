@@ -1,5 +1,8 @@
+from sqlalchemy import select
 from src.config import settings
+from src.models.admin import Admin
 from src.repositories.redis_repository import RedisRepository
+from src.database import async_session_maker
 
 
 class AuthService:
@@ -7,8 +10,21 @@ class AuthService:
     
     def __init__(self, redis_repository: RedisRepository = None):
         self.redis_repository = redis_repository or RedisRepository()
+
+    async def get_admins(self) -> list[int]:
+        """Получение списка ID администраторов из базы данных"""
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(Admin)
+            )
+            return [admin.user_id for admin in result.scalars().all()]
+        
+    async def is_admin_authenticated(self, user_id: int) -> bool:
+        """Проверка, аутентифицирован ли админ (по наличию в базе данных)"""
+        admins = await self.get_admins()
+        return user_id in admins
     
-    async def verify_admin_password(self, user_id: int, password: str) -> bool:
+    async def verify_admin_password(self, password: str) -> bool:
         """
         Проверка правильности пароля администратора
         
@@ -33,21 +49,14 @@ class AuthService:
             True, если аутентификация успешна, False иначе
         """
         # Проверяем пароль
-        if not await self.verify_admin_password(user_id, password):
+        if not await self.verify_admin_password(password):
             return False
         
-        # Добавляем админа в кэш на 6 часов
-        await self.redis_repository.add_admin(user_id)
-        return True
-    
-    async def is_admin_authenticated(self, admin_id: int) -> bool:
-        """
-        Проверка, аутентифицирован ли админ
+        async with async_session_maker() as session:
+            admin = Admin(
+                user_id=user_id
+            )
+            session.add(admin)
+            await session.commit()
         
-        Args:
-            admin_id: ID админа
-            
-        Returns:
-            True, если админ аутентифицирован, False иначе
-        """
-        return await self.redis_repository.is_admin_exists(admin_id)
+        return True

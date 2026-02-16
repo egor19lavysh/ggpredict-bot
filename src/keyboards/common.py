@@ -1,53 +1,53 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from typing import List
-from src.models.prediction import Prediction
+from src.models.message import Message
 
 
-def predictions_keyboard(
-    predictions: List[Prediction],
+def messages_keyboard(
+    messages: List[Message],
     current_page: int = 0,
     items_per_page: int = 18
 ) -> InlineKeyboardMarkup:
     """
-    Создание клавиатуры с предсказаниями (2 столбца по 9 предсказаний).
+    Создание клавиатуры с сообщениями (2 столбца по 9 сообщений).
     
     Args:
-        predictions: Список всех предсказаний
+        messages: Список всех сообщений
         current_page: Текущая страница (начиная с 0)
-        items_per_page: Количество предсказаний на странице (по умолчанию 18)
+        items_per_page: Количество сообщений на странице (по умолчанию 18)
         
     Returns:
-        InlineKeyboardMarkup с предсказаниями и кнопками навигации
+        InlineKeyboardMarkup с сообщениями и кнопками навигации
     """
     
     # Вычисляем диапазон предсказаний для текущей страницы
     start_idx = current_page * items_per_page
     end_idx = start_idx + items_per_page
-    page_predictions = predictions[start_idx:end_idx]
+    page_messages = messages[start_idx:end_idx]
     
     # Считаем общее количество страниц
-    total_pages = (len(predictions) + items_per_page - 1) // items_per_page
+    total_pages = (len(messages) + items_per_page - 1) // items_per_page
     
     # Создаём клавиатуру
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
     
-    # Добавляем предсказания в 2 столбца (9 в каждом)
-    for i in range(0, len(page_predictions), 2):
+    # Добавляем сообщения в 2 столбца (9 в каждом)
+    for i in range(0, len(page_messages), 2):
         row = []
         
-        # Первое предсказание в строке
-        pred_1 = page_predictions[i]
+        # Первое сообщение в строке
+        msg_1 = page_messages[i]
         row.append(InlineKeyboardButton(
-            text=f"{pred_1.text[:20]}...",
-            callback_data=f"prediction_{pred_1.id}"
+            text=f"{msg_1.text[:20]}...",
+            callback_data=f"message_{msg_1.id}"
         ))
         
-        # Второе предсказание в строке (если есть)
-        if i + 1 < len(page_predictions):
-            pred_2 = page_predictions[i + 1]
+        # Второе сообщение в строке (если есть)
+        if i + 1 < len(page_messages):
+            msg_2 = page_messages[i + 1]
             row.append(InlineKeyboardButton(
-                text=f"{pred_2.text[:20]}...",
-                callback_data=f"prediction_{pred_2.id}"
+                text=f"{msg_2.text[:20]}...",
+                callback_data=f"message_{msg_2.id}"
             ))
         
         keyboard.inline_keyboard.append(row)
@@ -65,13 +65,13 @@ def predictions_keyboard(
     # Кнопка "Назад"
     navigation_row.append(InlineKeyboardButton(
             text="⬅️Назад",
-            callback_data=f"predictions_page_{current_page - 1}" if current_page > 0 else "blank"
+            callback_data=f"messages_page_{current_page - 1}" if current_page > 0 else "blank"
         ))
     
     # Кнопка "Вперед" 
     navigation_row.append(InlineKeyboardButton(
             text="Вперед➡️",
-            callback_data=f"predictions_page_{current_page + 1}" if current_page < total_pages - 1 else "blank"
+            callback_data=f"messages_page_{current_page + 1}" if current_page < total_pages - 1 else "blank"
         ))
     
     if navigation_row:
@@ -91,4 +91,11 @@ def get_back_kb() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text="Назад")]
     ], resize_keyboard=True)
+    return keyboard
+
+def get_entities_kb() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Сообщения", callback_data="messages")],
+        [InlineKeyboardButton(text="Боссы", callback_data="bosses")],
+    ])
     return keyboard
