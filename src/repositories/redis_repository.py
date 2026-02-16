@@ -46,7 +46,7 @@ class RedisRepository:
         """
         await self.connect()
         key = f"{user_id}"
-        timestamp = datetime.datetime.now() + datetime.timedelta(hours=3)  # Сохраняем время следующей попытки
+        timestamp = datetime.datetime.now()  # Сохраняем время следующей попытки
         await self.redis.setex(key, self.TTL_SECONDS, str(timestamp))
         return True
     
