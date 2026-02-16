@@ -51,15 +51,15 @@ class MessageService:
     
     async def get_message_and_damage(self, user_id: int) -> tuple[Message, int]:
         # Проверяем, есть ли пользователь в кэше
-        user_exists = await self.redis_repository.is_user_exists(user_id)
+        #user_exists = await self.redis_repository.is_user_exists(user_id)
         
-        if user_exists:
-            raise MessageLimitExceeded
+        #if user_exists:
+        #    raise MessageLimitExceeded
         # Получаем предсказание
         message = await self.get_random_message()
         damage = random.randint(20, 1000)
         
         # Добавляем пользователя в кэш на 6 часов
-        await self.redis_repository.add_user(user_id)
+        #await self.redis_repository.add_user(user_id)
         
         return message, damage
