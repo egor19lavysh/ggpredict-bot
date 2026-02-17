@@ -59,7 +59,6 @@ class MessageService:
         message = await self.get_random_message()
         damage = random.randint(20, 1000)
         
-        # Добавляем пользователя в кэш на 6 часов
         await self.redis_repository.add_user(user_id)
         
         return message, damage

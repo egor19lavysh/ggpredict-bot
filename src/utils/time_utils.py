@@ -22,8 +22,7 @@ async def get_cooldown_message(timestamp_str: Optional[str], current_time: datet
     except (ValueError, AttributeError):
         return None
     
-    # Время до следующей попытки - 3 часа
-    cooldown_duration = datetime.timedelta(hours=3)
+    cooldown_duration = datetime.timedelta(hours=1)
     next_hit_time = last_hit_time + cooldown_duration
     
     # Вычисляем оставшееся время
