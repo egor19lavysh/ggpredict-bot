@@ -5,6 +5,7 @@ from .delete_message import router as delete_message_router
 from .edit_message import router as edit_message_router
 from .list_bosses import router as list_bosses_router
 from .hit import router as hit_router
+from .control_boss import router as control_boss_router
 
 routers = [
     auth_router,
@@ -13,5 +14,6 @@ routers = [
     delete_message_router,
     edit_message_router,
     list_bosses_router,
-    hit_router
+    hit_router,
+    control_boss_router
 ]

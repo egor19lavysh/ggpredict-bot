@@ -14,6 +14,8 @@ class RedisRepository:
     MAIN_BOSS_TTL = 43200
     # Префикс для ключа главного босса
     MAIN_BOSS_KEY = "main_boss_id" 
+    # Ключ для хранения статуса жизни босса
+    BOSS_ALIVE_KEY = "boss_alive"
     
     def __init__(self, redis_client: Optional[redis.Redis] = None):
         self.redis = redis_client
@@ -145,3 +147,45 @@ class RedisRepository:
         await self.connect()
         await self.redis.delete(self.MAIN_BOSS_KEY)
         return True
+    
+    # ========== Методы для кеширования статуса boss_alive ==========
+    async def save_boss_alive(self, is_alive: bool) -> bool:
+        """
+        Сохраняет статус активности босса в Redis.
+
+        Args:
+            is_alive: True если босс активен, иначе False
+
+        Returns:
+            True, если операция успешна
+        """
+        await self.connect()
+        value = "1" if is_alive else "0"
+        await self.redis.set(self.BOSS_ALIVE_KEY, value)
+        return True
+
+    async def get_boss_alive(self) -> Optional[bool]:
+        """
+        Получает статус активности босса из Redis.
+
+        Returns:
+            True/False если значение присутствует, иначе None
+        """
+        await self.connect()
+        val = await self.redis.get(self.BOSS_ALIVE_KEY)
+        if val is None:
+            return None
+        return val == "1"
+
+    async def remove_boss_alive(self) -> bool:
+        """
+        Удаляет статус boss_alive из Redis.
+
+        Returns:
+            True, если операция успешна
+        """
+        await self.connect()
+        await self.redis.delete(self.BOSS_ALIVE_KEY)
+        return True
+    
+    

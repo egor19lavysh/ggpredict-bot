@@ -97,5 +97,6 @@ def get_entities_kb() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Сообщения", callback_data="messages")],
         [InlineKeyboardButton(text="Боссы", callback_data="bosses")],
+        [InlineKeyboardButton(text="Активировать/деактивировать босса", callback_data="control_boss")]
     ])
     return keyboard

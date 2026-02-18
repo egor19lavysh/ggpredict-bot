@@ -8,6 +8,7 @@ from aiogram.exceptions import TelegramBadRequest
 from src.services.message_service import MessageService
 from src.repositories.redis_repository import RedisRepository
 from src.repositories.main_boss_repository import MainBossRepository
+from src.utils.boss_alive_manager import get_boss_alive_controller
 from src.utils.google_sheets_client import GoogleSheetsClient
 from src.services.boss_service import BossService
 from src.utils.time_utils import get_cooldown_message
@@ -34,10 +35,26 @@ TEXT_MESSAGE = """
 ⏳До следующей попытки нанести урон: 1 час
 """
 
+TEXT_MESSAGE_BOSS_DEAD = """
+💥<b>БОСС {boss} ПОВЕРЖЕН</b>💥
+Подземелье затихло, но ненадолго…
+Завтра вас ждет новая битва! 🗡
+
+<i>Оглашение самых стойких бойцов будет в ближайшее время.</i>
+"""
+
+async def is_boss_alive():
+    boss_alive = await redis_repository.get_boss_alive()
+    if boss_alive is None:
+        boss_alive = await get_boss_alive_controller()
+    
+    if isinstance(boss_alive, bool):
+        return boss_alive
+    elif hasattr(boss_alive, "is_alive"):
+        return boss_alive.is_alive
 
 @router.message(Command("hit"))
 async def hit_command_handler(message: Message):
-
     if await redis_repository.is_main_boss_exists():
         main_boss_id = await redis_repository.get_main_boss_id()
     else:
@@ -46,34 +63,45 @@ async def hit_command_handler(message: Message):
             await redis_repository.save_main_boss_id(main_boss_id)
 
     boss = await boss_service.get_boss_by_id(main_boss_id)
-    
-    try:
-        msg, damage =await message_service.get_message_and_damage(user_id=message.from_user.id)
 
-        await message.reply(TEXT_MESSAGE.format(
-            user=message.from_user.first_name if message.from_user.first_name else "Странник",
-            damage=damage,
-            boss=boss.name if boss else "главному боссу",
-            message=msg.text))
+    if await is_boss_alive():
         
-        await gs_client.hit(
-            user_info=[message.from_user.id, 
-                       message.from_user.username if message.from_user.username else "Аноним", 
-                       str(datetime.datetime.now())],  # Сохраняем время следующей попытки
-            boss_name=boss.name if boss else "Главный босс"
-        )
-        
-    except MessageLimitExceeded:
-        user_timestamp = await redis_repository.get_user(message.from_user.id)
-        current_time = datetime.datetime.now()
-        time = await get_cooldown_message(user_timestamp, current_time)
-        message_sent = await message.reply(f"🧧 Ты уже нанес урон {boss.name if boss else 'главному боссу'} 🧧\nДо следующей попытки: {time} часов⏳")
-        await asyncio.sleep(5)
-        await message_sent.delete()
+        try:
+            msg, damage =await message_service.get_message_and_damage(user_id=message.from_user.id)
+
+            await message.reply(TEXT_MESSAGE.format(
+                user=message.from_user.first_name if message.from_user.first_name else "Странник",
+                damage=damage,
+                boss=boss.name if boss else "главному боссу",
+                message=msg.text))
+            
+            await gs_client.hit(
+                user_info=[message.from_user.id, 
+                        message.from_user.username if message.from_user.username else "Аноним", 
+                        str(datetime.datetime.now())],  # Сохраняем время следующей попытки
+                boss_name=boss.name if boss else "Главный босс"
+            )
+            
+        except MessageLimitExceeded:
+            user_timestamp = await redis_repository.get_user(message.from_user.id)
+            current_time = datetime.datetime.now()
+            time = await get_cooldown_message(user_timestamp, current_time)
+            message_sent = await message.reply(f"🧧 Ты уже нанес урон {boss.name if boss else 'главному боссу'} 🧧\nДо следующей попытки: {time} часов⏳")
+            await asyncio.sleep(5)
+            await message_sent.delete()
+            await message.delete()
+        except Exception as e:
+            await message.reply("Произошла ошибка при попытке нанести урон главному боссу. Пожалуйста, попробуй снова позже.")
+            print(f"Error in hit_command_handler: {e}")
+    
+    else:
+        msg = await message.reply(TEXT_MESSAGE_BOSS_DEAD.format(
+            boss=boss.name if boss else "главный босс" 
+        ), parse_mode="HTML")
+
+        await asyncio.sleep(10)
         await message.delete()
-    except Exception as e:
-        await message.reply("Произошла ошибка при попытке нанести урон главному боссу. Пожалуйста, попробуй снова позже.")
-        print(f"Error in hit_command_handler: {e}")
+        await msg.delete()
 
 
 
